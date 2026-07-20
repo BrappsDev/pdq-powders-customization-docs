@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDQ Powders — Odoo Guide</title>
+<meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
+<!-- maintained by the odoo-customization-docs skill; bump on every production push -->
+<meta name="docs-last-documented" content="2026-07-20">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#0f8a6a; --accent-dark:#0a5f49; --ink:#18211d; --ink-soft:#4b5851;
+  --paper:#f3f6f4; --card:#ffffff; --line:#d7ddd6; --line-strong:#b1bcb3;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --disp:'Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Barlow','Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{font-family:var(--body);color:var(--ink);background:var(--paper);line-height:1.55;font-size:16px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.4;z-index:0;
+  background-image:radial-gradient(rgba(15,138,106,.06) 1px,transparent 1px);background-size:22px 22px}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:50;background:var(--ink);color:#eef3f0;border-bottom:4px solid var(--accent)}
+.accent-bar{height:6px;background:linear-gradient(90deg,var(--accent) 0,var(--accent-dark) 100%)}
+.masthead{display:flex;align-items:baseline;gap:18px;padding:14px 28px;flex-wrap:wrap}
+.masthead .brand{font-family:var(--disp);font-weight:700;font-size:30px;letter-spacing:.06em;text-transform:uppercase}
+.masthead .brand em{color:var(--accent);font-style:normal}
+.masthead .sub{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9fb0a8}
+.masthead .stamp{margin-left:auto;font-family:var(--mono);font-size:11px;color:#7f938a;letter-spacing:.08em}
+
+/* ---------- layout ---------- */
+.wrap{display:grid;grid-template-columns:272px minmax(0,1fr);max-width:1240px;margin:0 auto;position:relative;z-index:1}
+nav{position:sticky;top:84px;align-self:start;height:calc(100vh - 84px);overflow-y:auto;
+  padding:26px 18px 40px 26px;border-right:1px solid var(--line)}
+nav .find{width:100%;font-family:var(--mono);font-size:12px;padding:8px 10px;border:1.5px solid var(--line-strong);
+  background:var(--card);color:var(--ink);outline:none;margin-bottom:20px}
+nav .find:focus{border-color:var(--accent)}
+nav .grp{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);
+  margin:18px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+nav a{display:flex;gap:9px;align-items:baseline;padding:5px 6px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:500}
+nav a .no{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);min-width:22px}
+nav a:hover{color:var(--accent)}
+nav a.on{background:var(--ink);color:#eef3f0}
+nav a.on .no{color:var(--accent)}
+main{padding:34px 40px 120px;min-width:0}
+
+/* ---------- sections ---------- */
+section{margin-bottom:56px;scroll-margin-top:96px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:3px solid var(--ink);padding-bottom:8px;margin-bottom:6px}
+.sec-head .no{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.08em}
+.sec-head h2{font-family:var(--disp);font-weight:700;font-size:34px;letter-spacing:.03em;text-transform:uppercase}
+.sec-lede{color:var(--ink-soft);margin:10px 0 22px;max-width:72ch}
+
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ink);padding:20px 24px 18px;margin-bottom:18px;
+  box-shadow:0 1px 0 rgba(24,33,29,.05)}
+.card h3{font-family:var(--disp);font-size:22px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;margin-bottom:10px}
+.card.hot{border-left-color:var(--accent)}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:14px 0 5px}
+.lbl:first-of-type{margin-top:2px}
+.card ul{list-style:none;margin:0 0 2px}
+.card li{padding:3px 0 3px 18px;position:relative;max-width:80ch}
+.card li::before{content:"";position:absolute;left:2px;top:.72em;width:8px;height:2px;background:var(--accent)}
+.card p{max-width:80ch;margin:4px 0}
+
+.chip{display:inline-block;font-family:var(--mono);font-size:.8em;font-weight:500;background:#e8efeb;border:1px solid var(--line-strong);
+  border-bottom-width:2px;border-radius:4px;padding:0 7px;white-space:nowrap}
+.chip.red{background:var(--accent);border-color:var(--accent-dark);color:#fff}
+.path{font-family:var(--mono);font-size:.82em;color:var(--ink-soft)}
+.note{background:#f2f0e4;border:1px solid #e2dcc2;border-left:4px solid #c9a227;padding:10px 14px;font-size:14.5px;margin:12px 0 4px;max-width:80ch}
+.note b{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a6d12;display:block;margin-bottom:2px}
+
+/* ---------- changelog ---------- */
+.log{border-left:2px solid var(--line-strong);margin-left:6px;padding-left:26px}
+.log-entry{position:relative;margin-bottom:30px}
+.log-entry::before{content:"";position:absolute;left:-32px;top:6px;width:10px;height:10px;background:var(--accent);border-radius:50%}
+.log-date{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--accent)}
+.log-entry h4{font-family:var(--disp);font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;margin:2px 0 6px}
+.log-entry ul{list-style:none}
+.log-entry li{padding:2px 0 2px 16px;position:relative;max-width:82ch}
+.log-entry li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:2px;background:var(--line-strong)}
+
+footer{border-top:1px solid var(--line);margin-top:30px;padding:18px 0 0;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);letter-spacing:.05em}
+mark{background:#ffe27a;padding:0 2px}
+.hidden{display:none}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);padding:18px 22px}
+  main{padding:26px 22px 90px}
+  .masthead{padding:12px 18px}
+}
+@media print{
+  header,nav{display:none}
+  body::before{display:none}
+  .wrap{display:block}
+  .card{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="accent-bar"></div>
+  <div class="masthead">
+    <span class="brand">PDQ <em>Powders</em></span>
+    <span class="sub">Odoo Customization Guide</span>
+    <span class="stamp" id="stamp">Updated 2026-07-20</span>
+  </div>
+</header>
+
+<div class="wrap">
+<nav id="nav">
+  <input class="find" id="find" type="search" placeholder="FILTER… (e.g. weighing)" aria-label="Filter the guide">
+  <div class="grp">Production Floor</div>
+  <a href="#floor-app"><span class="no">01</span>Warehouse Floor App</a>
+  <a href="#weighing"><span class="no">02</span>Weighing &amp; Verification</a>
+  <div class="grp">Manufacturing Orders</div>
+  <a href="#splitting"><span class="no">03</span>Batch Sizes &amp; Splitting</a>
+  <a href="#bpr"><span class="no">04</span>Batch Production Record</a>
+  <a href="#bom-report"><span class="no">05</span>Yield &amp; BOM Report</a>
+  <a href="#queue"><span class="no">06</span>Production Queue Planner</a>
+  <div class="grp">Quality &amp; Inventory</div>
+  <a href="#quality-forms"><span class="no">07</span>Quality Forms &amp; Labels</a>
+  <a href="#oos"><span class="no">08</span>Out-of-Stock Alerts</a>
+  <div class="grp">History</div>
+  <a href="#changelog"><span class="no">09</span>Changelog</a>
+</nav>
+
+<main id="main">
+
+<!-- ============================ 01 FLOOR APP ============================ -->
+<section id="floor-app">
+  <div class="sec-head"><span class="no">§01</span><h2>Warehouse Floor App</h2></div>
+  <p class="sec-lede">A tablet-friendly, PIN-protected app for floor staff to run warehouse and production tasks without logging into full Odoo — every action is stamped with who did it.</p>
+
+  <div class="card hot">
+    <h3>Getting in</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>A touchscreen app called <span class="chip">Warehouse App</span> opens from the main Odoo menu (for staff in the warehouse group). The browser tab reads <b>PDQ Warehouse</b>.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Tap the screen and enter your <b>4-digit PIN</b>. Some actions (overrides) ask for a <b>Warehouse Admin</b> PIN instead.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Each employee's PIN lives on their employee record (exactly 4 digits, auto-assigned). A <span class="chip">Warehouse Admin</span> toggle on the employee grants override rights.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Clock In / Clock Out</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Clock onto a specific job — a manufacturing order, a vendor shipment, or as a driver — so time is tracked against the right work.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Use <span class="chip red">Clock In</span> / <span class="chip red">Clock Out</span>. Manual entry, driver entry, and a force clock-out are available.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Already clocked in somewhere? You'll get an <b>"Already clocked in elsewhere"</b> prompt.</li>
+      <li>Clock out of a production job with no recorded product activity and it warns <b>"No product entries were found during your clocked time."</b></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Clean Production — finishing an order from the floor</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Lists the active manufacturing orders and lets you record what was consumed and complete the order right on the floor.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>On completion it posts a summary (components used, and where relevant the average stick weight) to the order and <b>clocks out everyone on that job</b>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Moving &amp; receiving stock</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li><b>Inventory Transfer</b> — move product into the Inventory location by scanning a package/lot and entering a quantity, as full packages or loose units. Over-limit moves need an admin PIN.</li>
+      <li><b>Vendor Replenishment</b> — work incoming vendor/subcontract shipments: receive item by item, record discrepancies, complete the receipt, and assign a carrier / tracking number.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Waste, QC failures &amp; leftover checks</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li><b>Waste Processing</b> — record scrapped material (quantity, lot, notes) from any location.</li>
+      <li><b>QC Failed</b> — for a failed item, either <b>scrap</b> it or <b>return it to the vendor</b> (builds a return linked back to the original receipt / purchase order).</li>
+      <li><b>Inventory / Capsule check</b> — split a leftover count into <b>usable</b>, <b>unusable</b> (scrapped), and <b>R&amp;D</b> (moved to the R&amp;D location).</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Every action writes a log note on the record — employee, product, quantity, lot, and time — so there's a full audit trail.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 02 WEIGHING ============================ -->
+<section id="weighing">
+  <div class="sec-head"><span class="no">§02</span><h2>Weighing &amp; Verification</h2></div>
+  <p class="sec-lede">How sample stick weights drive powder consumption, the quality checks each sample must pass, and the verification gate before a run can proceed.</p>
+
+  <div class="card hot">
+    <h3>Sample weights drive powder used</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>During a run, staff weigh sample sticks in the floor app. The <b>average sample weight × quantity produced</b> is what determines how much component powder was actually used — leftover powder is <b>calculated, not guessed</b>.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Each weight is checked against the order's target range. Out-of-range weights or failed checks show a plain message, e.g. <b>"Sample weight 4.9 is below target minimum 5.0"</b>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Set <span class="chip">Target Weight (Min)</span> and <span class="chip">Target Weight (Max)</span> on the manufacturing order — max defaults to min + 0.2 g, and min can't exceed max.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Quality checks on every sample</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Each sample can require up to five checks: <b>Lot &amp; Exp Printed Clearly &amp; Correctly</b>, <b>UPC Printed Clearly &amp; Correctly</b>, <b>Length &amp; Ends Sealed</b>, <b>Artwork is Aligned</b>, and <b>Free of Defects</b>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Which checks apply is set <b>per finished-good lot</b> (a Required QC Fields list); new lots start with a sensible default set.</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
+    <h3>The verification gate</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Verification needs <b>10 passing rows in a row</b>. If any row fails, the order is flagged <span class="chip">Admin authorization required</span> and <b>all further app processing on that order is blocked</b> until a Warehouse Admin enters their PIN.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The admin override clears the flag and discards the in-progress verification rows; a clean run of 10 completes it.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>The "Page 10" batch record</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Prints the <b>Finished Product Inspection Log (Primary Packaging)</b> — the target range, lot format, then one row per sample: time, weight, a Pass/Fail pair for each required check, and the recorder's initials.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the manufacturing order, open the <span class="chip">Sample Weights</span> tab. <span class="chip">View Sample Weights</span> opens the recorded list; <span class="chip red">Print Page 10 Batch Record</span> prints the log (it appears once a sample exists).</li>
+    </ul>
+    <div class="note"><b>Heads up</b>Sample times on the printout are shown in Central Time.</div>
+  </div>
+
+  <div class="card">
+    <h3>Setup — which components are weighed</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On a <b>bill of materials</b>, each component line has a <span class="chip">Use Sample Weights</span> toggle — mark the components whose consumption comes from stick weights.</li>
+      <li>On a <b>product category</b>, a <span class="chip">Require Sample Weights</span> toggle auto-flags every component in that category as a stick powder.</li>
+      <li>On the <b>manufacturing order</b>, a <span class="chip">Lot Format</span> box describes how the lot/expiry prints on the stick.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>An order that uses sample weighing <b>can't be planned</b> until the Finished-Good Lot, Target Min, Target Max, and Lot Format are all filled — you'll get a message listing exactly what's missing.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 03 SPLITTING ============================ -->
+<section id="splitting">
+  <div class="sec-head"><span class="no">§03</span><h2>Batch Sizes &amp; Splitting</h2></div>
+  <p class="sec-lede">Cap how large a manufacturing batch can get, and split an oversized order into several right-sized batches that each run independently.</p>
+
+  <div class="card">
+    <h3>Setting a max batch size</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On a product's Inventory/Operations area, enter a <span class="chip">Max Batch Size</span> (in the product's unit).</li>
+      <li>Under <span class="chip">Customer Batch Sizes</span>, add a customer + their own max — that customer's cap then applies at every level of their order.</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
+    <h3>Splitting to batch size</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Splits an oversized manufacturing order into several orders of at most the max batch size — each a <b>separate, independently-sourced batch</b> (its own component transfer), not a backorder.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the manufacturing order, press <span class="chip red">Split to Batch Size</span> (it appears when the order is over its cap). A <span class="chip">Batch Siblings</span> button shows the related batch orders.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>It splits the <b>whole</b> batch (every order feeding the same demand), so re-splitting after lowering the cap won't stack a second batch and double the quantity.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Planned or already-picked orders</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>If some of the orders being rebuilt are already <b>scheduled</b>, you're asked to unplan them first (a confirmation lists them). If any have <b>started or finished</b> production, the split is refused so finished work is never lost.</li>
+      <li>If a component transfer for the order was already <b>completed</b>, the split now <b>reverses that transfer first</b> — the staged components go back to stock so the rebuilt batch doesn't pull them twice.</li>
+    </ul>
+    <div class="note"><b>Heads up</b>The confirmation warns that splitting deletes the linked transfers and component orders and rebuilds the batch. That's expected — it's how you get clean, independent batches.</div>
+  </div>
+
+  <div class="card">
+    <h3>Which "Split" to use</h3>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Odoo's native <b>Split</b> (in the Actions menu) is <b>hidden</b> — it makes <span class="chip">-001 / -002</span> backorders in one shared group. Always use the <span class="chip red">Split to Batch Size</span> button, which makes independent orders instead.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 04 BPR ============================ -->
+<section id="bpr">
+  <div class="sec-head"><span class="no">§04</span><h2>Batch Production Record</h2></div>
+  <p class="sec-lede">One click on a manufacturing order produces the editable Word weighing &amp; blending batch sheet, with each ingredient broken into the exact packages to weigh, by lot.</p>
+
+  <div class="card hot">
+    <h3>Printing the record</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Generates the <b>Weighing &amp; Blending Batch Production Record</b> as an editable Word document from the order.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the manufacturing order, press <span class="chip red">Batch Production Record</span>. The Word file downloads.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>It's only available once the component transfers are <b>done</b> (the picked lots drive the sheet). You get <b>one record per split batch</b> (Batch N of X).</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
+    <h3>How the ingredient amounts read</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Each ingredient's demand is broken into full packages plus a partial, per lot — e.g. <span class="chip">4 @ 25 Kg</span> and <span class="chip">1 @ 10.03 Kg</span> — using the package size on the product.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Amounts under 2 kg print in grams with a bold <b>(GRAMS)</b> flag; heavier amounts in kilograms. No thousands commas.</li>
+      <li>Lots and quantities come from the <b>completed pick ticket</b>. Actual weights, container numbers, and sign-offs are left blank to fill in by hand.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Setting a package size</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the product, open the <span class="chip">Batch Package</span> tab and enter the package name, size, and unit. <b>One per product.</b></li>
+    </ul>
+    <div class="note"><b>Heads up</b>The package size feeds the breakdown, so a wrong size shows a wrong (but arithmetically correct) count — e.g. a 25 g package on a bulk ingredient prints hundreds of tiny packages. Keep package sizes accurate.</div>
+  </div>
+</section>
+
+<!-- ============================ 05 BOM REPORT ============================ -->
+<section id="bom-report">
+  <div class="sec-head"><span class="no">§05</span><h2>Yield &amp; BOM Report</h2></div>
+  <p class="sec-lede">After a run, reconcile every component — picked, produced, scrapped, returned to inventory — with the production yield, for one order or a whole sale order.</p>
+
+  <div class="card">
+    <h3>Running the report</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Press <span class="chip red">BOM Report</span> on the manufacturing order (or on the sale order). In the popup, choose which orders and components to include, confirm the <span class="chip">PO Number</span>, then <span class="chip red">Generate Report</span> — it downloads a spreadsheet.</li>
+    </ul>
+    <div class="note"><b>Do this first</b>Before you confirm, a prompt reminds you: <b>enter all scrap for these products/lots first</b> — the yield numbers depend on it.</div>
+  </div>
+
+  <div class="card">
+    <h3>What's in it</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Columns include quantity <b>picked</b>, PO quantity, <b>produced</b>, <b>scrapped</b>, total <b>returned to inventory</b>, inventory remaining, and <b>Production Yield (%)</b>, with per-product subtotals and a Sticks Ordered / Sticks Produced summary.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Leftover powder is derived, not estimated: <b>picked − used (from the sample-weight average) − scrapped = returned to inventory</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 06 QUEUE ============================ -->
+<section id="queue">
+  <div class="sec-head"><span class="no">§06</span><h2>Production Queue Planner</h2></div>
+  <p class="sec-lede">Keeps each work center's schedule tidy automatically — closing gaps and pushing nothing into the past — as jobs finish, cancel, move, or split.</p>
+
+  <div class="card">
+    <h3>What it does</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>When a work order is finished, cancelled, unscheduled, dragged to a new time, or split into a backorder, the other <b>already-scheduled</b> work orders at that work center shift automatically to fill the gap or make room, using the work center's working hours.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>It only rearranges work orders that <b>already have a start/end time</b> — it doesn't pull new, unscheduled jobs from the queue for you.</li>
+      <li>Jobs that don't fit in the working day spill to the next working day; steps of one order never run out of sequence; a small buffer keeps auto-scheduled jobs from starting in the past.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Turning it on</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On a work center (<span class="path">Manufacturing → Configuration → Work Centers</span>), General Information tab, in <b>Auto Queue Planning</b>, tick <span class="chip">Enable Auto Queue Planning</span>.</li>
+      <li>Two settings then appear: <span class="chip">Auto-Plan Start Buffer (min)</span> (earliest a job may start from now — default 10) and <span class="chip">Queue Ordering Method</span> (Priority + FIFO, Deadline First, or Priority + Deadline).</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>It's <b>off by default</b> and set per work center. The work center must have a <b>Working Calendar</b> — all capacity and timing come from that.</li>
+      <li>Every reshuffle posts a log note (on the work center, the order, and any backorder) describing which work orders moved.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 07 QUALITY FORMS ============================ -->
+<section id="quality-forms">
+  <div class="sec-head"><span class="no">§07</span><h2>Quality Forms &amp; Labels</h2></div>
+  <p class="sec-lede">Packing slip / bill of lading for outgoing shipments, incoming-inspection forms and a release label for receipts, and a saved signature — all as buttons on the transfers you already use.</p>
+
+  <div class="card hot">
+    <h3>Packing slip / bill of lading</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Creates a <b>Packing Slip / Bill of Lading</b> PDF for an outgoing delivery.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On a validated delivery, press <span class="chip red">Generate Packing Slip</span>. In the popup: check Ship From / Ship To, enter the PO, choose who loaded and who counted, add special instructions, and for each line enter the <b>number of packages</b> and which <b>pallet(s)</b>.</li>
+      <li>Sign the <b>Shipper</b> box (your saved signature pre-fills), have the driver sign <b>Carrier</b>, then <span class="chip red">Generate Packing Slip</span>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The PDF is filed on the delivery, a note is posted to the delivery and its sales order, and it <b>can't be generated twice</b>. A <span class="chip">Packing Slip</span> smart button (on the delivery and the sale order) re-opens it. Entering packages for every line is required.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Incoming inspection forms &amp; release label</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>For a receipt, generates the <b>Incoming Material Inspection Form</b>, the <b>Component Inspection Report</b>, and a <b>2x4 "PDQ Released" label</b>. The headers auto-fill from the receipt; the inspection body is left blank for QC to complete by hand.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>When you validate an incoming receipt with tracked lots, the Inspection Forms popup opens (or press <span class="chip">Generate Inspection Forms</span>). Tick which documents to create, fill <b>Manufacturer</b>, <b>supplier lot #</b>, and <b>expiration</b> for each lot (these save back onto the lot), then <span class="chip red">Generate Forms</span>.</li>
+      <li>Print with <span class="chip">Print All Inspection Forms</span> / <span class="chip">Print All 2x4 Labels</span> (or the smart buttons).</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Each document type is generated <b>once per receipt</b>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Save your signature</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On your <span class="path">Preferences</span> page, the <b>PDQ Quality Forms</b> section lets you draw and store a default signature, so it pre-fills the Shipper box on future packing slips.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>On the delivery slip</h3>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The standard delivery slip now also shows the <b>Finished Good Lot</b> and <b>Lot Format</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 08 OOS ============================ -->
+<section id="oos">
+  <div class="sec-head"><span class="no">§08</span><h2>Out-of-Stock Alerts</h2></div>
+  <p class="sec-lede">Email the right people automatically the moment a product drops below the stock limit you set for its category.</p>
+
+  <div class="card">
+    <h3>What it does</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>When a product's <b>available quantity</b> (on-hand minus what's reserved) crosses below the limit set on its category, the chosen people get an email — subject <span class="chip">⚠ Out of Stock: Product (Location)</span> — showing the product, SKU, category, location, current available, and the threshold, with a <span class="chip">View Product in Odoo</span> button.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>It fires <b>once on the way down</b> — not repeatedly, and not again when stock recovers — and it's <b>email only</b> (there's no in-app log that an alert was sent).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Setting it up</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Open a product category (<span class="path">Inventory → Configuration → Categories</span>), find <b>Out of Stock Notifications</b>, set the <span class="chip">OOS Threshold</span> and pick the <span class="chip">OOS Notification Recipients</span> (Odoo users who have an email).</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The threshold defaults to <b>0</b> — alert only when stock goes negative. Set a positive number for an early safety-stock warning.</li>
+      <li>Settings on a parent category <b>copy down</b> to its sub-categories. Scope is per category — every product in it shares the same threshold and recipients.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 09 CHANGELOG ============================ -->
+<section id="changelog">
+  <div class="sec-head"><span class="no">§09</span><h2>Changelog</h2></div>
+  <p class="sec-lede">What changed on each production update, newest first.</p>
+
+  <div class="log">
+
+    <div class="log-entry">
+      <div class="log-date">2026-07-20</div>
+      <h4>Batch Production Record fixes &amp; split pick reversal</h4>
+      <ul>
+        <li><b>Batch Production Record — package counts fixed.</b> Ingredients whose recipe is in grams but whose product unit is Kg were printing counts about 1000× too high (e.g. <span class="chip">4,401 @ 25 Kg</span>); they now read correctly, e.g. <span class="chip">4 @ 25 Kg</span> + <span class="chip">1 @ 10.03 Kg</span>. The batch total now reads in kg, not grams.</li>
+        <li><b>Cleaner amounts.</b> Amounts auto-convert to kg or grams — under 2 kg shows grams with a bold <b>(GRAMS)</b> flag — with no thousands commas. Ingredient lots now come from the completed pick ticket, and table rows no longer duplicate across page breaks.</li>
+        <li><b>Splitting a picked batch.</b> If a component transfer was already completed, splitting now reverses it first, so the staged material returns to stock and the rebuilt batch doesn't pull it twice.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">Earlier</div>
+      <h4>Foundation</h4>
+      <ul>
+        <li><b>Warehouse Floor App</b> (PIN touchscreen): clock in/out, clean production, inventory transfers, vendor replenishment, waste, QC-failed scrap/return, and inventory &amp; capsule checks — every action logged with who did it.</li>
+        <li><b>Powder-stick weighing</b> with per-sample quality checks and a 10-row verification gate; the Page 10 batch-record printout; target weights and lot format on the order.</li>
+        <li><b>Yield &amp; BOM Report</b> reconciliation spreadsheet — picked, produced, scrapped, returned to inventory, and production yield.</li>
+        <li><b>Max batch size &amp; Split to Batch Size</b> — independent right-sized batches, batch siblings, an unplan gate for scheduled orders; Odoo's native Split hidden.</li>
+        <li><b>Batch Production Record</b> Word sheet with a per-lot package breakdown; one Batch Package size per product.</li>
+        <li><b>Production Queue planner</b> — automatic per-work-center rescheduling.</li>
+        <li><b>Quality forms</b> — packing slip / bill of lading, incoming inspection forms, the PDQ Released label, and a saved signature.</li>
+        <li><b>Out-of-stock email alerts</b> per product category.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer>PDQ POWDERS · ODOO CUSTOMIZATION GUIDE — maintained by Brapps. Questions or something out of date? Tell Bryan.</footer>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+  // scrollspy
+  var links=[].slice.call(document.querySelectorAll('nav a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  var obs=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id)});
+      }
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  secs.forEach(function(s){s&&obs.observe(s)});
+
+  // filter
+  var find=document.getElementById('find');
+  var cards=[].slice.call(document.querySelectorAll('.card,.log-entry'));
+  find.addEventListener('input',function(){
+    var q=find.value.trim().toLowerCase();
+    cards.forEach(function(c){
+      c.classList.toggle('hidden',!!q&&c.textContent.toLowerCase().indexOf(q)===-1);
+    });
+    document.querySelectorAll('section').forEach(function(s){
+      var any=!q||[].some.call(s.querySelectorAll('.card,.log-entry'),function(c){return !c.classList.contains('hidden')});
+      s.classList.toggle('hidden',!any);
+    });
+  });
+})();
+</script>
+</body>
+</html>
