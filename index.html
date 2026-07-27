@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-07-24">
+<meta name="docs-last-documented" content="2026-07-27">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-07-24</span>
+    <span class="stamp" id="stamp">Updated 2026-07-27</span>
   </div>
 </header>
 
@@ -529,7 +529,12 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>What the customer receives</h3>
     <div class="lbl">What it does</div>
     <ul>
-      <li>An email with a 2-tab Excel workbook attached, covering only the products linked to that contact: a <b>By Lot/Serial</b> tab (part #, description, lot/serial, location, expiration date, qty on hand, qty available, qty on order, unit of measure, and receipt date) and a <b>By Part Number</b> summary tab (part #, description, qty on hand, qty available, qty on order, unit of measure).</li>
+      <li>An email with a 2-tab Excel workbook attached, covering only the products linked to that contact: a <b>By Lot/Serial</b> tab (part #, description, lot/serial, location, expiration date, qty on hand, qty available, unit of measure, and receipt date) and a <b>By Part Number</b> summary tab (part #, description, qty on hand, qty available, qty on order, <b>MO Total Qty</b>, <b>Available After Production</b>, unit of measure).</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Quantities are shown in one standard unit per product (kg for weight-tracked items, Units for count-tracked ones), so nobody has to guess grams vs. kg. <b>Qty On Order</b> only counts open purchase orders — not what PDQ is manufacturing internally.</li>
+      <li><b>MO Total Qty</b> is the total of that part still needed by every open (not finished/cancelled) manufacturing order, regardless of whether it's actually been reserved yet. <b>Available After Production</b> is Qty On Hand − MO Total Qty + Qty On Order — PDQ's own version of a forecast, handy for spotting when a customer needs to ship more material soon.</li>
     </ul>
   </div>
 
@@ -545,6 +550,18 @@ mark{background:#ffe27a;padding:0 2px}
     </ul>
   </div>
 
+  <div class="card">
+    <h3>Sending to specific people instead of the main contact</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the contact's <span class="chip">Inventory Report</span> tab, add people to <span class="chip">Notify Contacts</span> (the picker only offers that contact's own sub-contacts, or the contact itself). If set, the report goes to everyone on that list instead of the contact's own email — all on one shared email/thread.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Leave it blank to keep sending to the contact's own email address, unchanged. Handy when a company is set up as one generic contact with specific people underneath it.</li>
+    </ul>
+  </div>
+
   <div class="card hot">
     <h3>Sending a report</h3>
     <div class="lbl">How to use it</div>
@@ -554,8 +571,9 @@ mark{background:#ffe27a;padding:0 2px}
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
-      <li>A confirmation appears once sending finishes. If a single contact can't be sent (no products linked, no email address, or one was already sent in the last 5 minutes), you'll see exactly why. Sending to several contacts at once shows how many went through, and — if any didn't — a popup groups the rest by reason with a way to open and fix them, then resend just that group.</li>
+      <li>A confirmation appears once sending finishes. If a single contact can't be sent (no products linked, no valid email address, or one was already sent in the last 5 minutes), you'll see exactly why. Sending to several contacts at once shows how many went through, and — if any didn't — a popup groups the rest by reason with a way to open and fix them, then resend just that group.</li>
       <li>The same contact can't be emailed twice within 5 minutes, so an accidental double-click or an overlapping scheduled send won't duplicate an email.</li>
+      <li>Every send is also logged on the contact's own message history, showing the actual email that went out — successes, failures, and a note if any Notify Contacts were skipped for having no valid email address.</li>
     </ul>
   </div>
 
@@ -581,12 +599,15 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-07-24 · PENDING PRODUCTION PUSH</div>
+      <div class="log-date">2026-07-27 · PENDING PRODUCTION PUSH</div>
       <h4>Customer Inventory Reports</h4>
       <ul>
         <li><b>New:</b> link a set of products to any customer/contact, then email them a 2-tab Excel inventory availability report (by lot/serial, and a by-part-number summary) — on demand for one or several contacts at once, or automatically on a Weekly, Every 2 Weeks, Monthly, or Month End schedule.</li>
         <li>Products are managed from a searchable/filterable product list with an <b>In Report</b> toggle, supporting bulk add/remove.</li>
         <li>Sending shows a confirmation, and groups any contacts that couldn't be sent by reason with a way to fix and resend them. The same contact can't be emailed twice within 5 minutes.</li>
+        <li><b>Notify Contacts:</b> a report can now go to a list of specific sub-contacts under a company instead of the main contact's own email.</li>
+        <li>The By Part Number tab gained two columns: <b>MO Total Qty</b> (total still needed by open manufacturing orders, regardless of reservation) and <b>Available After Production</b> (Qty On Hand − MO Total Qty + Qty On Order). Quantities across the report are now shown in a standard unit (kg or Units) instead of each product's raw configured unit, and <b>Qty On Order</b> now reflects purchase orders only.</li>
+        <li>Every send is logged on the contact's message history with the real email content, so successes, failures, and skipped recipients are never silent.</li>
       </ul>
     </div>
 
