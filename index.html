@@ -127,8 +127,9 @@ mark{background:#ffe27a;padding:0 2px}
   <a href="#quality-forms"><span class="no">07</span>Quality Forms &amp; Labels</a>
   <a href="#oos"><span class="no">08</span>Out-of-Stock Alerts</a>
   <a href="#customer-inventory-report"><span class="no">09</span>Customer Inventory Reports</a>
+  <a href="#lot-numbers"><span class="no">10</span>Lot Number Format</a>
   <div class="grp">History</div>
-  <a href="#changelog"><span class="no">10</span>Changelog</a>
+  <a href="#changelog"><span class="no">11</span>Changelog</a>
 </nav>
 
 <main id="main">
@@ -600,16 +601,67 @@ mark{background:#ffe27a;padding:0 2px}
 </section>
 
 <!-- ============================ 10 CHANGELOG ============================ -->
+<!-- ============================ 10 LOT NUMBER FORMAT ============================ -->
+<section id="lot-numbers">
+  <div class="sec-head"><span class="no">§10</span><h2>Lot Number Format</h2></div>
+  <p class="sec-lede">Ask Odoo for a lot number and it now builds PDQ's own format — a leading digit for what the item is, the date, and a counter that restarts each day.</p>
+
+  <div class="card">
+    <h3>Reading a lot number</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>A generated lot number is always nine digits — <span class="chip">926215001</span> reads as <b>9</b> finished good · <b>26</b> year 2026 · <b>215</b> the 215th day of the year · <b>001</b> the first lot of that day.</li>
+      <li>Raw materials, packaging, blends and other components lead with <b>5</b> instead of <b>9</b> — so <span class="chip">526215001</span> is the first component lot of the same day.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The daily counter is shared across every product, so two lots created on the same day never carry the same number.</li>
+      <li>The counter continues from the highest number already issued that day, <b>including lots that were numbered by hand</b> — nothing gets reissued.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Getting a number</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On a manufacturing order, click the <span class="chip">⊞</span> button beside <b>Lot/Serial Number</b>. The number appears in PDQ format. The same button on the shop-floor tablet behaves identically.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li><b>Typing a lot number yourself is unchanged.</b> Nothing is reformatted, renumbered, or rejected — this only changes the number Odoo proposes when you ask it for one.</li>
+      <li>Material received on a purchase transfer still keeps the <b>vendor's own lot code</b>; there is no generated number there.</li>
+      <li>Adding to a number afterwards still uses it up — record <span class="chip">526215001-316001</span> and the next lot that day is <b>002</b>, not another 001.</li>
+      <li>999 lots per leading digit per day is the ceiling. Past that Odoo asks for a wider number rather than quietly repeating one.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Choosing 9 or 5 for a product</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>The leading digit comes from the product's <b>category</b>. Open a category (<span class="path">Inventory → Configuration → Categories</span>) and set <span class="chip">Lot Number Prefix</span> to either <b>9 - Finished good</b> or <b>5 - Raw material / component</b>.</li>
+      <li>Leave it empty and the category follows its <b>parent</b>, so only the categories where the answer actually changes need filling in.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Set up today: <b>Finished Goods</b> and everything beneath it generates <b>9</b>; everything else — Raw Materials, Packaging, Customer Supplied, PPE, Janitorial — generates <b>5</b>.</li>
+      <li>A product with nothing set anywhere in its category tree is treated as a <b>component (5)</b>, on the reasoning that a finished good starting with 5 gets spotted straight away while the reverse would not.</li>
+      <li>Bulk sticks and bulk blends sit under Finished Goods today, so they generate <b>9</b>. Move a category, or set its prefix directly, if a group of items should number the other way.</li>
+    </ul>
+  </div>
+</section>
+
 <section id="changelog">
-  <div class="sec-head"><span class="no">§10</span><h2>Changelog</h2></div>
+  <div class="sec-head"><span class="no">§11</span><h2>Changelog</h2></div>
   <p class="sec-lede">What changed on each production update, newest first.</p>
 
   <div class="log">
 
     <div class="log-entry">
       <div class="log-date">2026-08-03 · PENDING PRODUCTION PUSH</div>
-      <h4>Customer Inventory Reports; native Split restored</h4>
+      <h4>Customer Inventory Reports; PDQ lot number format; native Split restored</h4>
       <ul>
+        <li><b>New — lot numbers in PDQ format.</b> The <span class="chip">⊞</span> button beside <b>Lot/Serial Number</b> on a manufacturing order now generates numbers like <span class="chip">926215001</span> (leading digit for what the item is, then year, day of year, and a counter that restarts daily) instead of Odoo's own numbering, which reused the previous lot's date. Which leading digit a product gets is set per product category with <span class="chip">Lot Number Prefix</span>, inherited by sub-categories. Lots numbered by hand are untouched, and the counter continues past them rather than repeating one — see §10.</li>
         <li><b>New:</b> link a set of products to any customer/contact, then email them a 2-tab Excel inventory availability report (by lot/serial, and a by-part-number summary) — on demand for one or several contacts at once, or automatically on a Weekly, Every 2 Weeks, Monthly, or Month End schedule.</li>
         <li>Products are managed from a searchable/filterable product list with an <b>In Report</b> toggle, supporting bulk add/remove.</li>
         <li>Sending shows a confirmation, and groups any contacts that couldn't be sent by reason with a way to fix and resend them. The same contact can't be emailed twice within 5 minutes.</li>
