@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-07-27">
+<meta name="docs-last-documented" content="2026-08-03">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-07-27</span>
+    <span class="stamp" id="stamp">Updated 2026-08-03</span>
   </div>
 </header>
 
@@ -320,12 +320,20 @@ mark{background:#ffe27a;padding:0 2px}
     <div class="note"><b>Heads up</b>The confirmation warns that splitting deletes the linked transfers and component orders and rebuilds the batch. That's expected — it's how you get clean, independent batches.</div>
   </div>
 
-  <div class="card">
+  <div class="card hot">
     <h3>Which "Split" to use</h3>
-    <div class="lbl">Good to know</div>
+    <div class="lbl">What it does</div>
     <ul>
-      <li>Odoo's native <b>Split</b> (in the Actions menu) is <b>hidden</b> — it makes <span class="chip">-001 / -002</span> backorders in one shared group. Always use the <span class="chip red">Split to Batch Size</span> button, which makes independent orders instead.</li>
+      <li>There are <b>two different splits</b> on a manufacturing order now, and they do different things:</li>
+      <li><span class="chip">Split</span> (in the <b>⚙ Actions</b> menu) — Odoo's built-in split. Divides the order's quantity into <span class="chip">-001 / -002</span> orders that <b>share one procurement group and one component transfer</b>. It does <b>not</b> resize or rebuild any child manufacturing orders, and does <b>not</b> ask you to unplan anything downstream.</li>
+      <li><span class="chip red">Split to Batch Size</span> (header button) — only appears when the order is over its Max Batch Size cap. Rebuilds the <b>whole batch</b> into independent orders, each with its <b>own</b> component transfer, and walks through the unplan/guard checks above.</li>
     </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Use native <span class="chip">Split</span> for an ad-hoc, arbitrary-quantity split that isn't about the max batch cap.</li>
+      <li>Use <span class="chip red">Split to Batch Size</span> whenever the split is about staying under a product's batch cap, or when the order has child manufacturing orders / work orders that need to come along cleanly.</li>
+    </ul>
+    <div class="note"><b>Heads up</b>Native Split won't touch child MOs or ask to unplan their work orders — if the order you're splitting has downstream manufacturing orders depending on it, use <span class="chip red">Split to Batch Size</span> instead, even if you're not near the batch cap.</div>
   </div>
 </section>
 
@@ -599,8 +607,8 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-07-27 · PENDING PRODUCTION PUSH</div>
-      <h4>Customer Inventory Reports</h4>
+      <div class="log-date">2026-08-03 · PENDING PRODUCTION PUSH</div>
+      <h4>Customer Inventory Reports; native Split restored</h4>
       <ul>
         <li><b>New:</b> link a set of products to any customer/contact, then email them a 2-tab Excel inventory availability report (by lot/serial, and a by-part-number summary) — on demand for one or several contacts at once, or automatically on a Weekly, Every 2 Weeks, Monthly, or Month End schedule.</li>
         <li>Products are managed from a searchable/filterable product list with an <b>In Report</b> toggle, supporting bulk add/remove.</li>
@@ -608,6 +616,7 @@ mark{background:#ffe27a;padding:0 2px}
         <li><b>Notify Contacts:</b> a report can now go to a list of specific sub-contacts under a company instead of the main contact's own email.</li>
         <li>The By Part Number tab gained two columns: <b>MO Total Qty</b> (total still needed by open manufacturing orders, regardless of reservation) and <b>Available After Production</b> (Qty On Hand − MO Total Qty + Qty On Order). Quantities across the report are now shown in a standard unit (kg or Units) instead of each product's raw configured unit, and <b>Qty On Order</b> now reflects purchase orders only.</li>
         <li>Every send is logged on the contact's message history with the real email content, so successes, failures, and skipped recipients are never silent.</li>
+        <li><b>Manufacturing orders:</b> Odoo's native <b>Split</b> (⚙ Actions menu) is back, for ad-hoc arbitrary-quantity splits. It's separate from <b>Split to Batch Size</b>, which stays the right choice for anything with child manufacturing orders or work orders (see §03).</li>
       </ul>
     </div>
 
