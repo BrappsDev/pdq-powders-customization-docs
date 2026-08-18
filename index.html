@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-08-03">
+<meta name="docs-last-documented" content="2026-08-18">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-08-03</span>
+    <span class="stamp" id="stamp">Updated 2026-08-18</span>
   </div>
 </header>
 
@@ -126,10 +126,11 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="grp">Quality &amp; Inventory</div>
   <a href="#quality-forms"><span class="no">07</span>Quality Forms &amp; Labels</a>
   <a href="#oos"><span class="no">08</span>Out-of-Stock Alerts</a>
-  <a href="#customer-inventory-report"><span class="no">09</span>Customer Inventory Reports</a>
-  <a href="#lot-numbers"><span class="no">10</span>Lot Number Format</a>
+  <a href="#adjustment-approval"><span class="no">09</span>Inventory Adjustment Approval</a>
+  <a href="#customer-inventory-report"><span class="no">10</span>Customer Inventory Reports</a>
+  <a href="#lot-numbers"><span class="no">11</span>Lot Number Format</a>
   <div class="grp">History</div>
-  <a href="#changelog"><span class="no">11</span>Changelog</a>
+  <a href="#changelog"><span class="no">12</span>Changelog</a>
 </nav>
 
 <main id="main">
@@ -457,10 +458,31 @@ mark{background:#ffe27a;padding:0 2px}
     <ul>
       <li>On a validated delivery, press <span class="chip red">Generate Packing Slip</span>. In the popup: check Ship From / Ship To, enter the PO, choose who loaded and who counted, add special instructions, and for each line enter the <b>number of packages</b> and which <b>pallet(s)</b>.</li>
       <li>Sign the <b>Shipper</b> box (your saved signature pre-fills), have the driver sign <b>Carrier</b>, then <span class="chip red">Generate Packing Slip</span>.</li>
+      <li><b>One slip for several deliveries:</b> tick two or more outgoing deliveries in the list view and pick <span class="chip">Print Combined Packing Slip</span> from the ⚙ actions menu. One PDF covers all of them, and each line prints the PO / sales order it actually belongs to.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
-      <li>The PDF is filed on the delivery, a note is posted to the delivery and its sales order, and it <b>can't be generated twice</b>. A <span class="chip">Packing Slip</span> smart button (on the delivery and the sale order) re-opens it. Entering packages for every line is required.</li>
+      <li>The PDF is filed on the delivery, a note is posted to the delivery and its sales order, and it's generated <b>once</b>. A <span class="chip">Packing Slip</span> smart button (on the delivery and the sale order) re-opens it. Entering packages for every line is required.</li>
+      <li><b>Need to redo one?</b> Press <span class="chip">Reset Packing Slip</span> on the delivery (e.g. to fix an address), then generate again. The previous PDF stays in the message log below, so nothing is lost. Resetting a combined slip resets every delivery it covered, together.</li>
+      <li>A <b>combined</b> slip can be generated <b>before the deliveries are validated</b> — print it while the truck is being loaded. The single-delivery button still requires a validated delivery.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Tying delivery lines to their sales orders</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Every line on an outgoing delivery has an <b>SO Line</b> column (Operations tab) naming the exact sales-order line it fulfills. This drives the delivered quantities and invoicing on the sales order, and it's what the combined packing slip reads to print each line's PO / sales order.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On mixed or hand-built deliveries that cover more than one sales order, set each line's <b>SO Line</b> to the right order line. The list only offers lines for the same customer and the same product.</li>
+      <li><b>You can change it even after the delivery is validated.</b> Fixing a wrong link — or clearing one — immediately moves the delivered quantity onto the right sales-order line (and off the wrong one), and invoicing follows.</li>
+      <li>The same column can also be edited straight in the list at <span class="path">Inventory → Reporting → Moves Analysis</span>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Everything else on a validated delivery stays locked — the SO Line link is the only thing that can be corrected after the fact.</li>
     </ul>
   </div>
 
@@ -529,9 +551,43 @@ mark{background:#ffe27a;padding:0 2px}
   </div>
 </section>
 
-<!-- ============================ 09 CUSTOMER INVENTORY REPORTS ============================ -->
+<!-- ============================ 09 INVENTORY ADJUSTMENT APPROVAL ============================ -->
+<section id="adjustment-approval">
+  <div class="sec-head"><span class="no">§09</span><h2>Inventory Adjustment Approval</h2></div>
+  <p class="sec-lede">A count you enter doesn't change stock by itself anymore — unless you're an approver, it waits for one to sign off first.</p>
+
+  <div class="card hot">
+    <h3>What happens when you count stock</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Enter a count anywhere in Odoo (the Inventory Adjustments list, <b>Update Quantity</b> on a product, or confirming a lot count) and, unless you hold the <b>Inventory Adjustment Approver</b> role, it doesn't apply right away — it's <b>submitted for approval</b> instead. You'll see a <b>"Submitted for Approval"</b> confirmation.</li>
+      <li>An approver's own count still applies immediately, exactly as before — this only changes counts entered by <b>everyone else</b>.</li>
+      <li>Once approved, the count applies exactly as if you'd entered it yourself; a rejected count never touches stock.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>While a count for a product/location is awaiting approval, you <b>can't submit another one</b> for that same product/location — wait for it to be approved or rejected first.</li>
+      <li>The Inventory Adjustments list flags a line awaiting approval, and both you and the approvers get notified automatically.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Approving or rejecting</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Approvers: go to <span class="path">Inventory → Adjustments → Adjustment Approvals</span>, open a request, and press <span class="chip red">Approve</span> or <span class="chip">Reject</span> (a reason is required). Anyone can withdraw their own pending request with <span class="chip">Cancel</span>.</li>
+      <li>Everyone can see their own submissions under <span class="path">Inventory → Adjustments → My Adjustment Requests</span>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>You can't approve your own request. If the stock on hand has changed since the count was submitted, approval is blocked — reject it instead and ask for a fresh count.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 10 CUSTOMER INVENTORY REPORTS ============================ -->
 <section id="customer-inventory-report">
-  <div class="sec-head"><span class="no">§09</span><h2>Customer Inventory Reports</h2></div>
+  <div class="sec-head"><span class="no">§10</span><h2>Customer Inventory Reports</h2></div>
   <p class="sec-lede">Email a customer an Excel inventory availability report for just the products they buy — on demand, or automatically on a recurring schedule.</p>
 
   <div class="card hot">
@@ -603,15 +659,18 @@ mark{background:#ffe27a;padding:0 2px}
 <!-- ============================ 10 CHANGELOG ============================ -->
 <!-- ============================ 10 LOT NUMBER FORMAT ============================ -->
 <section id="lot-numbers">
-  <div class="sec-head"><span class="no">§10</span><h2>Lot Number Format</h2></div>
+  <div class="sec-head"><span class="no">§11</span><h2>Lot Number Format</h2></div>
   <p class="sec-lede">Ask Odoo for a lot number and it now builds PDQ's own format — a leading digit for what the item is, the date, and a counter that restarts each day.</p>
+
+  <div class="note"><b>Not turned on yet</b>This section describes how it will work once it's switched on — it's staged but not yet active. Until then, Odoo keeps generating lot numbers the old way.</div>
 
   <div class="card">
     <h3>Reading a lot number</h3>
     <div class="lbl">What it does</div>
     <ul>
       <li>A generated lot number is always nine digits — <span class="chip">926215001</span> reads as <b>9</b> finished good · <b>26</b> year 2026 · <b>215</b> the 215th day of the year · <b>001</b> the first lot of that day.</li>
-      <li>Raw materials, packaging, blends and other components lead with <b>5</b> instead of <b>9</b> — so <span class="chip">526215001</span> is the first component lot of the same day.</li>
+      <li>Raw materials, packaging and other components lead with <b>5</b> instead of <b>9</b> — so <span class="chip">526215001</span> is the first component lot of the same day.</li>
+      <li><b>Blended and pre-mixed powders count as finished goods</b> — they get the <b>9</b>, even though something downstream consumes them.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
@@ -644,24 +703,36 @@ mark{background:#ffe27a;padding:0 2px}
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
-      <li>Set up today: <b>Finished Goods</b> and everything beneath it generates <b>9</b>; everything else — Raw Materials, Packaging, Customer Supplied, PPE, Janitorial — generates <b>5</b>.</li>
+      <li>Set up today, <b>9</b> is generated by <b>Finished Goods</b> and everything beneath it, plus <b>Blended Powders</b> and <b>Pre Mixed Powders</b> (and everything beneath those) — a blend counts as a finished good in its own right even though something downstream consumes it.</li>
+      <li>Everything else generates <b>5</b>: the rest of Raw Materials, all of Packaging, Customer Supplied, PPE and Janitorial.</li>
       <li>A product with nothing set anywhere in its category tree is treated as a <b>component (5)</b>, on the reasoning that a finished good starting with 5 gets spotted straight away while the reverse would not.</li>
-      <li>Bulk sticks and bulk blends sit under Finished Goods today, so they generate <b>9</b>. Move a category, or set its prefix directly, if a group of items should number the other way.</li>
+      <li>Because the setting lives on the category, a group of items can be moved from one digit to the other in one place — no need to touch products individually.</li>
     </ul>
   </div>
 </section>
 
 <section id="changelog">
-  <div class="sec-head"><span class="no">§11</span><h2>Changelog</h2></div>
+  <div class="sec-head"><span class="no">§12</span><h2>Changelog</h2></div>
   <p class="sec-lede">What changed on each production update, newest first.</p>
 
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-08-03 · PENDING PRODUCTION PUSH</div>
-      <h4>Customer Inventory Reports; PDQ lot number format; native Split restored</h4>
+      <div class="log-date">2026-08-18 · PENDING PRODUCTION PUSH</div>
+      <h4>Combined packing slips, SO-line tagging on deliveries, slip reset</h4>
       <ul>
-        <li><b>New — lot numbers in PDQ format.</b> The <span class="chip">⊞</span> button beside <b>Lot/Serial Number</b> on a manufacturing order now generates numbers like <span class="chip">926215001</span> (leading digit for what the item is, then year, day of year, and a counter that restarts daily) instead of Odoo's own numbering, which reused the previous lot's date. Which leading digit a product gets is set per product category with <span class="chip">Lot Number Prefix</span>, inherited by sub-categories. Lots numbered by hand are untouched, and the counter continues past them rather than repeating one — see §10.</li>
+        <li><b>New — combined packing slips.</b> Tick several outgoing deliveries in the list and pick <b>Print Combined Packing Slip</b> to get one PDF across all of them, each line showing its own PO / sales order. Combined slips can be printed <b>before</b> the deliveries are validated, so the slip can ride along while the truck is loaded. See §07.</li>
+        <li><b>New — SO Line column on deliveries.</b> Each delivery line can be tagged with the exact sales-order line it fulfills — the fix for mixed shipments built from more than one order. The tag stays editable <b>even after the delivery is validated</b>, and correcting or clearing it immediately moves the delivered quantity (and invoicing) to the right order line. Also editable in the list at Inventory → Reporting → Moves Analysis. See §07.</li>
+        <li><b>New — Reset Packing Slip.</b> A generated slip can now be reset and regenerated (e.g. to fix a Ship To address); the previous PDF stays in the message log. Resetting a combined slip resets every delivery it covered.</li>
+        <li><b>Lot numbers:</b> blended and pre-mixed powders will be numbered as <b>finished goods (9)</b> rather than components, once the PDQ lot format is switched on (see §11).</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-08-03</div>
+      <h4>Adjustment approvals, Customer Inventory Reports, native Split restored</h4>
+      <ul>
+        <li><b>New — inventory counts need approval.</b> Unless you hold the new <b>Inventory Adjustment Approver</b> role, a stock count you enter is now submitted for approval instead of applying immediately. See §09.</li>
         <li><b>New:</b> link a set of products to any customer/contact, then email them a 2-tab Excel inventory availability report (by lot/serial, and a by-part-number summary) — on demand for one or several contacts at once, or automatically on a Weekly, Every 2 Weeks, Monthly, or Month End schedule.</li>
         <li>Products are managed from a searchable/filterable product list with an <b>In Report</b> toggle, supporting bulk add/remove.</li>
         <li>Sending shows a confirmation, and groups any contacts that couldn't be sent by reason with a way to fix and resend them. The same contact can't be emailed twice within 5 minutes.</li>
@@ -669,6 +740,7 @@ mark{background:#ffe27a;padding:0 2px}
         <li>The By Part Number tab gained two columns: <b>MO Total Qty</b> (total still needed by open manufacturing orders, regardless of reservation) and <b>Available After Production</b> (Qty On Hand − MO Total Qty + Qty On Order). Quantities across the report are now shown in a standard unit (kg or Units) instead of each product's raw configured unit, and <b>Qty On Order</b> now reflects purchase orders only.</li>
         <li>Every send is logged on the contact's message history with the real email content, so successes, failures, and skipped recipients are never silent.</li>
         <li><b>Manufacturing orders:</b> Odoo's native <b>Split</b> (⚙ Actions menu) is back, for ad-hoc arbitrary-quantity splits. It's separate from <b>Split to Batch Size</b>, which stays the right choice for anything with child manufacturing orders or work orders (see §03).</li>
+        <li><b>Staged, not yet turned on:</b> PDQ-format lot numbers (leading digit + date + daily counter) — see §11.</li>
       </ul>
     </div>
 
