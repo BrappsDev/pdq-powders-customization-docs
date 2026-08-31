@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-08-18">
+<meta name="docs-last-documented" content="2026-08-31">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-08-18</span>
+    <span class="stamp" id="stamp">Updated 2026-08-31</span>
   </div>
 </header>
 
@@ -456,14 +456,17 @@ mark{background:#ffe27a;padding:0 2px}
     </ul>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>On a validated delivery, press <span class="chip red">Generate Packing Slip</span>. In the popup: check Ship From / Ship To, enter the PO, choose who loaded and who counted, add special instructions, and for each line enter the <b>number of packages</b> and which <b>pallet(s)</b>.</li>
+      <li>On a validated delivery, press <span class="chip red">Generate Packing Slip</span>. In the popup: check Ship From, pick the <b>Ship To</b> address, enter the PO, choose who loaded and who counted, add special instructions, and for each line enter the <b>number of packages</b> and which <b>pallet(s)</b>.</li>
       <li>Sign the <b>Shipper</b> box (your saved signature pre-fills), have the driver sign <b>Carrier</b>, then <span class="chip red">Generate Packing Slip</span>.</li>
+      <li><b>Shipping somewhere other than the usual address?</b> <b>Ship To</b> starts on the delivery order's address, but you can change it here to any other contact saved under that customer — no need to touch the delivery. That is the address that prints on the slip.</li>
       <li><b>One slip for several deliveries:</b> tick two or more outgoing deliveries in the list view and pick <span class="chip">Print Combined Packing Slip</span> from the ⚙ actions menu. One PDF covers all of them, and each line prints the PO / sales order it actually belongs to.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
       <li>The PDF is filed on the delivery, a note is posted to the delivery and its sales order, and it's generated <b>once</b>. A <span class="chip">Packing Slip</span> smart button (on the delivery and the sale order) re-opens it. Entering packages for every line is required.</li>
       <li><b>Need to redo one?</b> Press <span class="chip">Reset Packing Slip</span> on the delivery (e.g. to fix an address), then generate again. The previous PDF stays in the message log below, so nothing is lost. Resetting a combined slip resets every delivery it covered, together.</li>
+      <li>For a customer that receives at several locations, save each location as a <b>contact</b> on the customer record (Contacts → open the customer → <b>Contacts &amp; Addresses</b>). Every contact saved there shows up in the <b>Ship To</b> list. When you pick one, the slip prints the customer name above that location's address.</li>
+      <li>The delivery shows a <b>Packing Slip Ship To</b> line whenever the slip went somewhere other than the delivery address, so you can see later where it actually shipped.</li>
       <li>A <b>combined</b> slip can be generated <b>before the deliveries are validated</b> — print it while the truck is being loaded. The single-delivery button still requires a validated delivery.</li>
     </ul>
   </div>
@@ -718,9 +721,10 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-08-18 · PENDING PRODUCTION PUSH</div>
-      <h4>Combined packing slips, SO-line tagging on deliveries, slip reset</h4>
+      <div class="log-date">2026-08-31 · PENDING PRODUCTION PUSH</div>
+      <h4>Choose the packing slip Ship To, combined packing slips, SO-line tagging, slip reset</h4>
       <ul>
+        <li><b>New — choose the Ship To address on the packing slip.</b> The <b>Ship To</b> box in the Generate Packing Slip popup can now be changed. It still starts on the delivery order's address, and the list offers every contact saved under that customer — so a customer who receives at several locations can have each one saved as a contact and picked at print time, without editing the delivery. See §07.</li>
         <li><b>New — combined packing slips.</b> Tick several outgoing deliveries in the list and pick <b>Print Combined Packing Slip</b> to get one PDF across all of them, each line showing its own PO / sales order. Combined slips can be printed <b>before</b> the deliveries are validated, so the slip can ride along while the truck is loaded. See §07.</li>
         <li><b>New — SO Line column on deliveries.</b> Each delivery line can be tagged with the exact sales-order line it fulfills — the fix for mixed shipments built from more than one order. The tag stays editable <b>even after the delivery is validated</b>, and correcting or clearing it immediately moves the delivered quantity (and invoicing) to the right order line. Also editable in the list at Inventory → Reporting → Moves Analysis. See §07.</li>
         <li><b>New — Reset Packing Slip.</b> A generated slip can now be reset and regenerated (e.g. to fix a Ship To address); the previous PDF stays in the message log. Resetting a combined slip resets every delivery it covered.</li>
