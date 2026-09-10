@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-08-31">
+<meta name="docs-last-documented" content="2026-09-10">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-08-31</span>
+    <span class="stamp" id="stamp">Updated 2026-09-10</span>
   </div>
 </header>
 
@@ -342,21 +342,51 @@ mark{background:#ffe27a;padding:0 2px}
 <!-- ============================ 04 BPR ============================ -->
 <section id="bpr">
   <div class="sec-head"><span class="no">§04</span><h2>Batch Production Record</h2></div>
-  <p class="sec-lede">One click on a manufacturing order produces the editable Word weighing &amp; blending batch sheet, with each ingredient broken into the exact packages to weigh, by lot.</p>
+  <p class="sec-lede">One click on a manufacturing order produces an editable Word batch sheet — the weighing &amp; blending record, or the stick packaging record — filled in from the order, its picked lots and the product's spec.</p>
 
   <div class="card hot">
-    <h3>Printing the record</h3>
+    <h3>Printing a record</h3>
     <div class="lbl">What it does</div>
     <ul>
-      <li>Generates the <b>Weighing &amp; Blending Batch Production Record</b> as an editable Word document from the order.</li>
+      <li>Generates a <b>Batch Production Record</b> as an editable Word document from the order. Two records are available: <b>Weighing and Blending</b> and <b>Stick Packaging (Primary)</b>.</li>
     </ul>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>On the manufacturing order, press <span class="chip red">Batch Production Record</span>. The Word file downloads.</li>
+      <li>On the manufacturing order, press <span class="chip red">Batch Production Record</span>. Pick the record you want in the popup, then press <span class="chip red">Print</span> — the Word file downloads and is also filed on the order.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
       <li>It's only available once the component transfers are <b>done</b> (the picked lots drive the sheet). You get <b>one record per split batch</b> (Batch N of X).</li>
+      <li>Both records share the same page header — customer, product, lot, item number, expiry, PO, SO and MO number.</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
+    <h3>The stick packaging record</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Fills in the primary-packaging sheet from the order: product details, <b>Material Issuance</b> (every component at its demanded quantity), and <b>Primary Packaging Components</b> — a row per picked lot, with item code, lot and quantity.</li>
+      <li>Carries the run's numbers through the rest of the sheet: the target fill weight and lot code repeat on the first-article and finished-product inspection logs, the film is named on the label reconciliation, and the line set-up instruction names the powder, the lot code, the expiry and the blade.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The target fill weight is the order's own <span class="chip">Target Weight (Min)</span> / <span class="chip">Target Weight (Max)</span> — the same pair the app checks stick sample weights against, so the printed target always matches the enforced one.</li>
+      <li>Quantities read as the floor weighs them: powders in whole grams with commas (e.g. <span class="chip">329,139g</span>), film and boxes as a piece count (e.g. <span class="chip">47,071</span>).</li>
+      <li>The consumer box and master shipper appear under Material Issuance but are <b>left off</b> the primary packaging component table — they are packed out separately. This is driven by each component's role (below).</li>
+      <li>Everything the floor and quality sign — weights, equipment IDs, pass/fail checks, personnel, yields — is left blank to fill in by hand.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Setting up a product for the packaging record</h3>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>On the <b>finished</b> product, open the <span class="chip">Batch Production Record</span> tab and fill in <span class="chip">Count per Consumer Box</span> (leave at zero for a bulk stick product — the sheet then reads <b>NA</b>), <span class="chip">Allergens</span> (left empty it prints <b>NONE</b>), <span class="chip">Probiotic</span> and <span class="chip">Stick Pack Blade</span>.</li>
+      <li>On each <b>component</b>, set <span class="chip">BPR Component Role</span> on the same tab — Bulk Powder, Film / Label, Consumer Box, Master Shipper or Other. The role names the powder and film in the set-up instructions and keeps the box and shipper off the primary sheet.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>A component with <b>no role set</b> prints on the primary sheet — on a batch record an extra row is a question, a missing row is a gap.</li>
     </ul>
   </div>
 
@@ -377,7 +407,7 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>Setting a package size</h3>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>On the product, open the <span class="chip">Batch Package</span> tab and enter the package name, size, and unit. <b>One per product.</b></li>
+      <li>On the product, open the <span class="chip">Batch Production Record</span> tab and enter the package name, size, and unit at the bottom of the tab. <b>One per product.</b></li>
     </ul>
     <div class="note"><b>Heads up</b>The package size feeds the breakdown, so a wrong size shows a wrong (but arithmetically correct) count — e.g. a 25 g package on a bulk ingredient prints hundreds of tiny packages. Keep package sizes accurate.</div>
   </div>
@@ -721,9 +751,11 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-08-31 · PENDING PRODUCTION PUSH</div>
-      <h4>Choose the packing slip Ship To, combined packing slips, SO-line tagging, slip reset</h4>
+      <div class="log-date">2026-09-10 · PENDING PRODUCTION PUSH</div>
+      <h4>Stick packaging batch record, choose the packing slip Ship To, combined packing slips, SO-line tagging, slip reset</h4>
       <ul>
+        <li><b>New — Stick Packaging (Primary) Batch Production Record.</b> <span class="chip red">Batch Production Record</span> on a manufacturing order now asks which record to print, and the new stick packaging sheet fills in from the order the same way the weighing sheet does — product details, Material Issuance, a Primary Packaging Components row per picked lot, and the target weight and lot code repeated through the inspection logs and label reconciliation. The consumer box and master shipper stay off the primary sheet. See §04.</li>
+        <li><b>Products — the Batch Package tab is now Batch Production Record.</b> It still holds the package size, and adds the packaging spec the sheet prints: count per consumer box, allergens, probiotic, blade, and each component's role (bulk powder / film / consumer box / master shipper). See §04.</li>
         <li><b>New — choose the Ship To address on the packing slip.</b> The <b>Ship To</b> box in the Generate Packing Slip popup can now be changed. It still starts on the delivery order's address, and the list offers every contact saved under that customer — so a customer who receives at several locations can have each one saved as a contact and picked at print time, without editing the delivery. See §07.</li>
         <li><b>New — combined packing slips.</b> Tick several outgoing deliveries in the list and pick <b>Print Combined Packing Slip</b> to get one PDF across all of them, each line showing its own PO / sales order. Combined slips can be printed <b>before</b> the deliveries are validated, so the slip can ride along while the truck is loaded. See §07.</li>
         <li><b>New — SO Line column on deliveries.</b> Each delivery line can be tagged with the exact sales-order line it fulfills — the fix for mixed shipments built from more than one order. The tag stays editable <b>even after the delivery is validated</b>, and correcting or clearing it immediately moves the delivered quantity (and invoicing) to the right order line. Also editable in the list at Inventory → Reporting → Moves Analysis. See §07.</li>
