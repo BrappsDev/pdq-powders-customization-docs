@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-09-10">
+<meta name="docs-last-documented" content="2026-09-29">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-09-10</span>
+    <span class="stamp" id="stamp">Updated 2026-09-29</span>
   </div>
 </header>
 
@@ -640,7 +640,7 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>Choosing which products a customer sees</h3>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>Open the customer's contact record, go to the <span class="chip">Inventory Report</span> tab, and press <span class="chip red">Manage Linked Products</span>. This opens a searchable, filterable product list — tick the <b>In Report</b> box on any product to add it, untick to remove it. Select several rows at once to add or remove a batch in one go.</li>
+      <li>Open the customer's contact record, go to the <span class="chip">Inventory Report</span> tab, and press <span class="chip red">Manage Linked Products</span>. This opens a searchable, filterable product list — tick the <b>In Report</b> box on any product to add it, untick to remove it. Select several rows at once to add or remove a batch in one go. To change every product in a search, tick the header checkbox, click <span class="chip">Select all</span>, then toggle <b>In Report</b> on any selected row — the confirmation shows how many products will change, and it applies to all of them, not just the page on screen.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
@@ -679,7 +679,7 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>Setting up a recurring schedule</h3>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>On the contact's <span class="chip">Inventory Report</span> tab, tick <span class="chip">Send Scheduled Inventory Report</span>, then choose a <b>Frequency</b>: <b>Weekly</b> or <b>Every 2 Weeks</b> (pick the day), <b>Monthly</b> (pick the day of the month), or <b>Month End</b> (the last calendar day of the month). Set the time of day the report should go out.</li>
+      <li>On the contact's <span class="chip">Inventory Report</span> tab, tick <span class="chip">Send Scheduled Inventory Report</span>, then choose a <b>Frequency</b>: <b>Daily</b> (every day), <b>Weekly</b> or <b>Every 2 Weeks</b> (pick the day), <b>Monthly</b> (pick the day of the month), or <b>Month End</b> (the last calendar day of the month). Set the time of day the report should go out.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
@@ -749,6 +749,22 @@ mark{background:#ffe27a;padding:0 2px}
   <p class="sec-lede">What changed on each production update, newest first.</p>
 
   <div class="log">
+
+    <div class="log-entry">
+      <div class="log-date">2026-09-29 · PENDING PRODUCTION PUSH</div>
+      <h4>Bulk add/remove across every page</h4>
+      <ul>
+        <li><b>Manage Linked Products — "Select all" now covers every page.</b> Choosing <span class="chip">Select all</span> and toggling <b>In Report</b> now adds or removes every matching product, not only the 80 shown on screen. See §10.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-09-29</div>
+      <h4>Daily inventory reports</h4>
+      <ul>
+        <li><b>New — Daily frequency.</b> Scheduled Customer Inventory Reports can now go out every day at the chosen send time, alongside Weekly, Every 2 Weeks, Monthly and Month End.</li>
+      </ul>
+    </div>
 
     <div class="log-entry">
       <div class="log-date">2026-09-10</div>
