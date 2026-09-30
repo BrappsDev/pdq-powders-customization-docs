@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-09-29">
+<meta name="docs-last-documented" content="2026-09-30">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-09-29</span>
+    <span class="stamp" id="stamp">Updated 2026-09-30</span>
   </div>
 </header>
 
@@ -285,7 +285,7 @@ mark{background:#ffe27a;padding:0 2px}
 <!-- ============================ 03 SPLITTING ============================ -->
 <section id="splitting">
   <div class="sec-head"><span class="no">§03</span><h2>Batch Sizes &amp; Splitting</h2></div>
-  <p class="sec-lede">Cap how large a manufacturing batch can get, and split an oversized order into several right-sized batches that each run independently.</p>
+  <p class="sec-lede">Cap how large a manufacturing batch can get, split an oversized order into several right-sized batches that each run independently, and split an order down to what the components in stock can make now.</p>
 
   <div class="card">
     <h3>Setting a max batch size</h3>
@@ -323,12 +323,38 @@ mark{background:#ffe27a;padding:0 2px}
   </div>
 
   <div class="card hot">
+    <h3>Split Production — run what you have now</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>When a customer sends less material than an order needs, shows how many units each manufacturing order can make <b>right now</b> from the components in stock, and splits the order in one click: one order for what can run, fully reserved, and a <span class="chip">-002</span> backorder for the rest.</li>
+      <li>Stock counted is what sits in the warehouse's stock locations and isn't already reserved for another order. Components already staged in Pre-Production for other orders are not counted; anything already reserved for <b>this</b> order is.</li>
+      <li>A component made on order (it gets its own manufacturing order automatically) is worked out from <b>its</b> components, as many levels down as needed. A component made to stock only counts what is in stock — nothing will be made for it automatically.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>From the manufacturing orders list, tick one or more orders and press <span class="chip">Split Production</span> at the top; or open an order and choose <span class="chip">Split Production</span> from the <b>⚙ Actions</b> menu.</li>
+      <li>Each line shows the order's <b>Demand</b> and its <b>Available to Produce</b>. Remove a component category at the top to leave those components out (e.g. a shipping box or an insert that goes on later) — every line recalculates.</li>
+      <li>Type over <b>Available to Produce</b> to set your own figure. Lines greyed out because nothing (or everything) is available can still be typed over; a figure above 0 and below the demand switches the line on.</li>
+      <li>Drag lines by the handle to set priority. Components are shared out from the top line down, so the orders you move up get them first.</li>
+      <li>Toggle on the lines to split and press <span class="chip red">Split Productions</span>. You land on a list of the orders and their backorders.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Lines start with starred (urgent) orders first, then by scheduled date.</li>
+      <li>Opening the window leaves every reservation as it is. After you <b>reorder</b> lines, the figures show what each order would get if their components were handed out again in the new order — and <span class="chip red">Split Productions</span> does exactly that, re-reserving the lines you don't split in their new place. Closing the window changes nothing.</li>
+      <li>The split rebuilds each half's component transfer and any component manufacturing orders, so the backorder has its own pick ticket and waits for the rest of the material. The kept order is reserved straight away.</li>
+      <li>An order can't be split once its components have been picked, it has started, or one of its component orders is planned or started — the line shows why. Only Manufacturing administrators see the button.</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
     <h3>Which "Split" to use</h3>
     <div class="lbl">What it does</div>
     <ul>
       <li>There are <b>two different splits</b> on a manufacturing order now, and they do different things:</li>
       <li><span class="chip">Split</span> (in the <b>⚙ Actions</b> menu) — Odoo's built-in split. Divides the order's quantity into <span class="chip">-001 / -002</span> orders that <b>share one procurement group and one component transfer</b>. It does <b>not</b> resize or rebuild any child manufacturing orders, and does <b>not</b> ask you to unplan anything downstream.</li>
       <li><span class="chip red">Split to Batch Size</span> (header button) — only appears when the order is over its Max Batch Size cap. Rebuilds the <b>whole batch</b> into independent orders, each with its <b>own</b> component transfer, and walks through the unplan/guard checks above.</li>
+      <li><span class="chip">Split Production</span> (list button and ⚙ Actions) — splits at what the components in stock can make now, with a backorder for the rest that gets its own pick ticket. See the card above.</li>
     </ul>
     <div class="lbl">How to use it</div>
     <ul>
@@ -751,10 +777,12 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-09-29 · PENDING PRODUCTION PUSH</div>
-      <h4>Bulk add/remove across every page</h4>
+      <div class="log-date">2026-09-30</div>
+      <h4>Split Production to what you can run now; bulk add/remove across every page</h4>
       <ul>
+        <li><b>New — Split Production.</b> Select manufacturing orders (or use ⚙ Actions on one) and press <span class="chip">Split Production</span> to see how many units the components in stock can make now, leave component categories out, set priority by dragging lines, and split each order into a reserved order for what can run plus a backorder for the rest. See §03.</li>
         <li><b>Manage Linked Products — "Select all" now covers every page.</b> Choosing <span class="chip">Select all</span> and toggling <b>In Report</b> now adds or removes every matching product, not only the 80 shown on screen. See §10.</li>
+        <li><b>Fixed — error when editing some manufacturing orders.</b> Changing a manufacturing order could stop with an "Odoo Server Error" when one of its components had been weighed out from two or more lots on the same <b>Pick Components</b> transfer. Those orders now save normally, and the batch record check works the same as before.</li>
       </ul>
     </div>
 
