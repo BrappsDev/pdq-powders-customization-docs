@@ -328,7 +328,7 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>Split Production — run what you have now</h3>
     <div class="lbl">What it does</div>
     <ul>
-      <li>When a customer sends less material than an order needs, shows how many units each manufacturing order can make <b>right now</b> from the components in stock, and splits the order in one click: one order for what can run, fully reserved, and a <span class="chip">-002</span> backorder for the rest.</li>
+      <li>When a customer sends less material than an order needs, shows how many units each manufacturing order can make <b>right now</b> from the components in stock, and splits the order in one click into <b>two new, independent orders</b> — one for what can run, fully reserved, and one for the rest — each with its own order number and pick ticket, like <span class="chip red">Split to Batch Size</span>.</li>
       <li>Stock counted is <b>everything on hand</b> in the warehouse's stock locations, even if it is reserved for another order, a delivery or a transfer. Components already staged in Pre-Production for other orders are not counted; anything already in Pre-Production for <b>this</b> order is.</li>
       <li>A component made on order (it gets its own manufacturing order automatically) is worked out from <b>its</b> components, as many levels down as needed. A component made to stock only counts what is in stock — nothing will be made for it automatically.</li>
     </ul>
@@ -345,7 +345,7 @@ mark{background:#ffe27a;padding:0 2px}
       <li>Lines start with starred (urgent) orders first, then by scheduled date.</li>
       <li>When a line's figure relies on stock reserved elsewhere, its note says so, e.g. <span class="chip">Takes 6 … reserved by other orders</span>. On <span class="chip red">Split Productions</span> the order you keep takes that stock: non-starred reservations lose it first, then the latest scheduled. Picked quantities and stock in Pre-Production are never taken. The orders that lose stock are re-checked straight away and get a note saying what was taken.</li>
       <li>A line never takes stock from a line above it. After you <b>reorder</b> lines, <span class="chip red">Split Productions</span> also hands the listed orders' reservations out again in the new order, re-reserving the lines you don't split in their new place. Closing the window changes nothing.</li>
-      <li>The split rebuilds each half's component transfer and any component manufacturing orders, so the backorder has its own pick ticket and waits for the rest of the material. The kept order is reserved straight away.</li>
+      <li>The original order is replaced: it and its component orders are cancelled and removed, and the two new orders are created in their place, each with its own pick ticket and component orders, still linked to the same sale order. The order for what can run is reserved straight away; the other waits for the rest of the material. Each new order has a note saying which order it was split from.</li>
       <li>An order can't be split once its components have been picked, it has started, or one of its component orders is planned or started — the line shows why. Only Manufacturing administrators see the button.</li>
     </ul>
   </div>
@@ -357,7 +357,7 @@ mark{background:#ffe27a;padding:0 2px}
       <li>There are <b>two different splits</b> on a manufacturing order now, and they do different things:</li>
       <li><span class="chip">Split</span> (in the <b>⚙ Actions</b> menu) — Odoo's built-in split. Divides the order's quantity into <span class="chip">-001 / -002</span> orders that <b>share one procurement group and one component transfer</b>. It does <b>not</b> resize or rebuild any child manufacturing orders, and does <b>not</b> ask you to unplan anything downstream.</li>
       <li><span class="chip red">Split to Batch Size</span> (header button) — only appears when the order is over its Max Batch Size cap. Rebuilds the <b>whole batch</b> into independent orders, each with its <b>own</b> component transfer, and walks through the unplan/guard checks above.</li>
-      <li><span class="chip">Split Production</span> (list button and ⚙ Actions) — splits at what the components in stock can make now, with a backorder for the rest that gets its own pick ticket. See the card above.</li>
+      <li><span class="chip">Split Production</span> (list button and ⚙ Actions) — splits at what the components in stock can make now into two new, independent orders (no backorder), each with its own pick ticket. See the card above.</li>
     </ul>
     <div class="lbl">How to use it</div>
     <ul>
@@ -825,9 +825,16 @@ mark{background:#ffe27a;padding:0 2px}
 
     <div class="log-entry">
       <div class="log-date">2026-10-01 · PENDING PRODUCTION PUSH</div>
-      <h4>Close an order short; batch record check on split orders</h4>
+      <h4>Close an order short</h4>
       <ul>
         <li><b>New — Close Short on sales orders.</b> Sales Administrators can close an order short once supply has run out: what's still open for it is cancelled, the order is locked and marked Closed Short, and it invoices on what was delivered. See §12.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-10-01</div>
+      <h4>Batch record check on split orders — finished batches skipped</h4>
+      <ul>
         <li><b>Batch Production Record — split orders, second fix.</b> A batch that was already <b>finished</b> when a later pick ticket was validated no longer claims material from that ticket. Before, if an early batch's own pick ticket ran short and it was completed from stock, the next batch's full weigh-out was partly credited to the finished one and its record failed the component check (read as ~49%). See §04.</li>
       </ul>
     </div>
