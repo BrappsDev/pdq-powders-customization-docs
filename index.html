@@ -366,6 +366,20 @@ mark{background:#ffe27a;padding:0 2px}
     </ul>
     <div class="note"><b>Heads up</b>Native Split won't touch child MOs or ask to unplan their work orders — if the order you're splitting has downstream manufacturing orders depending on it, use <span class="chip red">Split to Batch Size</span> instead, even if you're not near the batch cap.</div>
   </div>
+
+  <div class="card">
+    <h3>Cancelling an order cleans up after itself</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Cancelling a <b>manufacturing order</b> also cancels its pick ticket once no other batch in the chain still needs it. Before, a split batch's pick ticket stayed open for good after the batch was cancelled.</li>
+      <li>Cancelling a <b>sales order</b> cancels the manufacturing orders made for it — the ordered products, their split batches and the component orders feeding them — and, through the rule above, their pick tickets.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>A manufacturing order that has <b>already started producing</b> is left open. The sales order's message log names which orders were cancelled and which were left for someone to decide on.</li>
+      <li>A pick ticket still feeding a sister batch that is confirmed stays open, as before.</li>
+    </ul>
+  </div>
 </section>
 
 <!-- ============================ 04 BPR ============================ -->
@@ -386,6 +400,7 @@ mark{background:#ffe27a;padding:0 2px}
     <div class="lbl">Good to know</div>
     <ul>
       <li>It's only available once the component transfers are <b>done</b> (the picked lots drive the sheet). You get <b>one record per split batch</b> (Batch N of X).</li>
+      <li><b>Split orders count only their own weigh-outs.</b> When a manufacturing order has been split, the batches share one pick ticket chain. Each batch's record and its 99.8–100.2% component check use only the pick tickets weighed for that batch — in the order they were validated — so a sister batch's material never inflates the percentage. A batch that was already finished when a later pick ticket was validated is skipped over for that ticket. Weigh and validate the pick tickets in batch order (-001, then -002, …) so each lands on the right record.</li>
       <li>Both records share the same page header — customer, product, lot, item number, expiry, PO, SO and MO number.</li>
     </ul>
   </div>
@@ -809,10 +824,18 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="log">
 
     <div class="log-entry">
-      <div class="log-date">2026-09-30 · PENDING PRODUCTION PUSH</div>
-      <h4>Split Production to what you can run now; bulk add/remove across every page; close an order short</h4>
+      <div class="log-date">2026-10-01 · PENDING PRODUCTION PUSH</div>
+      <h4>Close an order short; batch record check on split orders</h4>
       <ul>
         <li><b>New — Close Short on sales orders.</b> Sales Administrators can close an order short once supply has run out: what's still open for it is cancelled, the order is locked and marked Closed Short, and it invoices on what was delivered. See §12.</li>
+        <li><b>Batch Production Record — split orders, second fix.</b> A batch that was already <b>finished</b> when a later pick ticket was validated no longer claims material from that ticket. Before, if an early batch's own pick ticket ran short and it was completed from stock, the next batch's full weigh-out was partly credited to the finished one and its record failed the component check (read as ~49%). See §04.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-09-30</div>
+      <h4>Split Production to what you can run now; bulk add/remove across every page</h4>
+      <ul>
         <li><b>Split Production counts everything on hand.</b> Stock reserved to another job now counts, and splitting takes it from the lowest-priority reservation, re-checks that order and leaves it a note. See §03.</li>
         <li><b>New — Split Production.</b> Select manufacturing orders (or use ⚙ Actions on one) and press <span class="chip">Split Production</span> to see how many units the components in stock can make now, leave component categories out, set priority by dragging lines, and split each order into a reserved order for what can run plus a backorder for the rest. See §03.</li>
         <li><b>Manage Linked Products — "Select all" now covers every page.</b> Choosing <span class="chip">Select all</span> and toggling <b>In Report</b> now adds or removes every matching product, not only the 80 shown on screen. See §10.</li>
@@ -824,6 +847,15 @@ mark{background:#ffe27a;padding:0 2px}
       <h4>Daily inventory reports</h4>
       <ul>
         <li><b>New — Daily frequency.</b> Scheduled Customer Inventory Reports can now go out every day at the chosen send time, alongside Weekly, Every 2 Weeks, Monthly and Month End.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-09-17</div>
+      <h4>Batch record check on split orders; cancellations clean up pick tickets</h4>
+      <ul>
+        <li><b>Batch Production Record — split orders count only their own weigh-outs.</b> The 99.8–100.2% component check on a split batch was adding up every pick ticket in the chain, so the second batch of a split read as 190% and could not print. Each batch now counts only the pick tickets weighed for it, and is no longer held up by a sister batch's open pick ticket. See §04.</li>
+        <li><b>Cancelling cleans up.</b> Cancelling a manufacturing order cancels its pick ticket once no other batch needs it; cancelling a sales order cancels the manufacturing orders made for it (except any already in production, which are named in the message log). See §03.</li>
       </ul>
     </div>
 
