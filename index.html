@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-10-15">
+<meta name="docs-last-documented" content="2026-11-04">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-10-15</span>
+    <span class="stamp" id="stamp">Updated 2026-11-04</span>
   </div>
 </header>
 
@@ -129,8 +129,10 @@ mark{background:#ffe27a;padding:0 2px}
   <a href="#adjustment-approval"><span class="no">09</span>Inventory Adjustment Approval</a>
   <a href="#customer-inventory-report"><span class="no">10</span>Customer Inventory Reports</a>
   <a href="#lot-numbers"><span class="no">11</span>Lot Number Format</a>
+  <div class="grp">Sales Orders</div>
+  <a href="#close-short"><span class="no">12</span>Closing an Order Short</a>
   <div class="grp">History</div>
-  <a href="#changelog"><span class="no">12</span>Changelog</a>
+  <a href="#changelog"><span class="no">13</span>Changelog</a>
 </nav>
 
 <main id="main">
@@ -191,6 +193,11 @@ mark{background:#ffe27a;padding:0 2px}
     <ul>
       <li><b>Inventory Transfer</b> — move product into the Inventory location by scanning a package/lot and entering a quantity, as full packages or loose units. Over-limit moves need an admin PIN.</li>
       <li><b>Vendor Replenishment</b> — work incoming vendor/subcontract shipments: receive item by item, record discrepancies, complete the receipt, and assign a carrier / tracking number.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>A transfer moves <b>exactly the lot you picked, from exactly the location you picked</b>. If that location does not hold enough of the lot, the transfer is refused with a message saying how much is there; it never takes stock from a different shelf instead. The same goes for R&amp;D moves from an inventory check and QC-failed returns to a vendor.</li>
+      <li>Moving stock to the location it is already in is refused.</li>
     </ul>
   </div>
 
@@ -721,12 +728,12 @@ mark{background:#ffe27a;padding:0 2px}
     <h3>Setting up a recurring schedule</h3>
     <div class="lbl">How to use it</div>
     <ul>
-      <li>On the contact's <span class="chip">Inventory Report</span> tab, tick <span class="chip">Send Scheduled Inventory Report</span>, then choose a <b>Frequency</b>: <b>Daily</b> (every day), <b>Weekly</b> or <b>Every 2 Weeks</b> (pick the day), <b>Monthly</b> (pick the day of the month), or <b>Month End</b> (the last calendar day of the month). Set the time of day the report should go out.</li>
+      <li>On the contact's <span class="chip">Inventory Report</span> tab, add one or more lines under <b>Schedules</b>. Each line has its own <b>Frequency</b>: <b>Daily</b>, <b>Weekly</b> or <b>Every 2 Weeks</b> (pick the day), <b>Monthly</b> (pick the day of the month), or <b>Month End</b> (the last calendar day of the month). Each line also has an <b>Enabled</b> toggle to pause it. For example, a Weekly line on Monday plus a Month End line. All lines send the same report to the same people at the contact's single <b>Send Time</b>; if two lines fall due at the same moment the customer receives one email. Each line shows its own <span class="chip">Last Sent</span> and <span class="chip">Next Send</span>.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
       <li>The tab shows <span class="chip">Last Sent</span> and <span class="chip">Next Scheduled Send</span> so it's easy to confirm a schedule is active and see when the next one goes out.</li>
-      <li><b>Month End</b> defaults to sending near the very end of the day, for month-close reporting.</li>
+      <li>There is one <b>Send Time</b> per contact, shared by all of its schedules. For month-close reporting late in the day, set the Send Time accordingly (e.g. 11:45 PM).</li>
     </ul>
   </div>
 </section>
@@ -786,11 +793,64 @@ mark{background:#ffe27a;padding:0 2px}
   </div>
 </section>
 
+<!-- ============================ 12 CLOSING AN ORDER SHORT ============================ -->
+<section id="close-short">
+  <div class="sec-head"><span class="no">§12</span><h2>Closing an Order Short</h2></div>
+  <p class="sec-lede">When supply runs out and you've shipped all you can, close the sales order short so the rest stops showing as demand to produce.</p>
+
+  <div class="card hot">
+    <h3>Close Short</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Cancels everything still open for the order: delivery backorders, pick tickets, and manufacturing orders made for it (including the ones for its components).</li>
+      <li>What has already shipped stays exactly as it is.</li>
+      <li>The order is locked and shows a <b>Closed Short</b> ribbon. The chatter records who closed it, when, the reason, and the ordered vs delivered quantity on each line.</li>
+      <li>The forecast and the production queue stop counting the quantity that will never ship, so nobody is asked to make it.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Open the confirmed sales order and press <span class="chip red">Close Short</span>. The window lists what will be cancelled. Enter a reason and press <span class="chip red">Close Short</span> again.</li>
+      <li>To find these orders later, use <span class="path">Sales → Orders → Filters → Closed Short</span>.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Only <b>Sales Administrators</b> see the button.</li>
+      <li>The close is refused while the order has an open <b>receipt or return</b>, or a manufacturing order that is <b>already in production</b>. The message names them. Validate or cancel them first, then close.</li>
+      <li>A closed-short order invoices on what was <b>delivered</b>, even for products normally invoiced on the ordered quantity. If more was already invoiced than delivered, it shows as fully invoiced; no credit note is suggested.</li>
+      <li><span class="chip">Unlock</span> lets you edit the order again, but it stays Closed Short and nothing that was cancelled comes back.</li>
+    </ul>
+  </div>
+</section>
+
 <section id="changelog">
-  <div class="sec-head"><span class="no">§12</span><h2>Changelog</h2></div>
+  <div class="sec-head"><span class="no">§13</span><h2>Changelog</h2></div>
   <p class="sec-lede">What changed on each production update, newest first.</p>
 
   <div class="log">
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-04</div>
+      <h4>Floor app transfers move the right lot from the right shelf</h4>
+      <ul>
+        <li><b>Floor app — Transfers fixed.</b> A transfer could take the stock from a different shelf than the one chosen, sometimes the destination shelf itself, so nothing actually moved, and when the stock was spread over more than one spot the quantity could be counted two or three times. Transfers, R&amp;D moves from an inventory check, and QC-failed vendor returns now move exactly the chosen lot from exactly the chosen location, and refuse if it is not there. See §01.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-04</div>
+      <h4>Multiple schedules per customer</h4>
+      <ul>
+        <li><b>New — multiple schedules per customer.</b> A contact's scheduled Inventory Report can now have several schedules at once (for example Weekly and Month End). Existing schedules were carried over unchanged.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-04</div>
+      <h4>Close an order short</h4>
+      <ul>
+        <li><b>New — Close Short on sales orders.</b> Sales Administrators can close an order short once supply has run out: what's still open for it is cancelled, the order is locked and marked Closed Short, and it invoices on what was delivered. See §12.</li>
+      </ul>
+    </div>
 
     <div class="log-entry">
       <div class="log-date">2026-10-14</div>
@@ -813,7 +873,6 @@ mark{background:#ffe27a;padding:0 2px}
       <div class="log-date">2026-09-30</div>
       <h4>Split Production to what you can run now; bulk add/remove across every page</h4>
       <ul>
-        <li><b>Split Production makes independent orders.</b> Splitting now replaces the order with two new orders — what can run, and the rest — each with its own order number and pick ticket, the way Split to Batch Size does. No more -001 / -002 backorders. See §03.</li>
         <li><b>Split Production counts everything on hand.</b> Stock reserved to another job now counts, and splitting takes it from the lowest-priority reservation, re-checks that order and leaves it a note. See §03.</li>
         <li><b>New — Split Production.</b> Select manufacturing orders (or use ⚙ Actions on one) and press <span class="chip">Split Production</span> to see how many units the components in stock can make now, leave component categories out, set priority by dragging lines, and split each order into a reserved order for what can run plus a backorder for the rest. See §03.</li>
         <li><b>Manage Linked Products — "Select all" now covers every page.</b> Choosing <span class="chip">Select all</span> and toggling <b>In Report</b> now adds or removes every matching product, not only the 80 shown on screen. See §10.</li>
