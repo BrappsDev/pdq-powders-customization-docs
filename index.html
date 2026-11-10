@@ -6,7 +6,7 @@
 <title>PDQ Powders — Odoo Guide</title>
 <meta name="description" content="How PDQ Powders' Odoo customizations work and how to use them.">
 <!-- maintained by the odoo-customization-docs skill; bump on every production push -->
-<meta name="docs-last-documented" content="2026-11-04">
+<meta name="docs-last-documented" content="2026-11-09">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@ mark{background:#ffe27a;padding:0 2px}
   <div class="masthead">
     <span class="brand">PDQ <em>Powders</em></span>
     <span class="sub">Odoo Customization Guide</span>
-    <span class="stamp" id="stamp">Updated 2026-11-04</span>
+    <span class="stamp" id="stamp">Updated 2026-11-09</span>
   </div>
 </header>
 
@@ -131,8 +131,10 @@ mark{background:#ffe27a;padding:0 2px}
   <a href="#lot-numbers"><span class="no">11</span>Lot Number Format</a>
   <div class="grp">Sales Orders</div>
   <a href="#close-short"><span class="no">12</span>Closing an Order Short</a>
+  <div class="grp">Purchasing</div>
+  <a href="#full-packs"><span class="no">13</span>Ordering in Full Packs</a>
   <div class="grp">History</div>
-  <a href="#changelog"><span class="no">13</span>Changelog</a>
+  <a href="#changelog"><span class="no">14</span>Changelog</a>
 </nav>
 
 <main id="main">
@@ -378,11 +380,49 @@ mark{background:#ffe27a;padding:0 2px}
     <ul>
       <li>Cancelling a <b>manufacturing order</b> also cancels its pick ticket once no other batch in the chain still needs it. Before, a split batch's pick ticket stayed open for good after the batch was cancelled.</li>
       <li>Cancelling a <b>sales order</b> cancels the manufacturing orders made for it — the ordered products, their split batches and the component orders feeding them — and, through the rule above, their pick tickets.</li>
+      <li>Finishing a <b>manufacturing order</b> without validating its pick ticket cancels the pick ticket lines it no longer needs, so they stop showing as stock going out (negative forecast) and asking to be bought on the Replenishment report.</li>
     </ul>
     <div class="lbl">Good to know</div>
     <ul>
       <li>A manufacturing order that has <b>already started producing</b> is left open. The sales order's message log names which orders were cancelled and which were left for someone to decide on.</li>
       <li>A pick ticket still feeding a sister batch that is confirmed stays open, as before.</li>
+      <li>If you finish part of an order and create a <b>backorder</b>, its pick ticket stays open for the backorder and is only cleaned up once the backorder is finished too. A pick ticket you already validated is never changed.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Merging orders combines their pick tickets</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>Merging manufacturing orders of the same product (list → select them → <b>⚙ Actions → Merge</b>) now gives the merged order <b>one new pick ticket</b> for its full component quantity. The old orders' pick tickets are cancelled, each with a note naming the merged order.</li>
+      <li>Component orders made for the old orders are <b>not</b> merged or changed; they keep feeding the merged order through the new pick ticket. You can merge them too with the same Merge action, and they get one pick ticket the same way.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>The merge is <b>refused</b>, and nothing changes, when one of the orders has already started, a pick ticket line or component order feeding it is already done, or one of its pick tickets also feeds an order you did not select. The message names each one.</li>
+      <li>The new pick ticket is not reserved; use <span class="chip">Check Availability</span> as usual.</li>
+    </ul>
+  </div>
+
+  <div class="card hot">
+    <h3>Changing an order's quantity resizes its component orders</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>When you change the quantity of a confirmed manufacturing order, the manufacturing orders made <b>directly</b> for its components change with it, and so do the pick tickets of every order that changed. They keep their order numbers; nothing is cancelled and rebuilt.</li>
+      <li>Works both ways: shrink an order when a customer ships less material, or grow it when they ship more. Growing an order makes the existing pick ticket line bigger instead of adding a second line, and no extra component order is created.</li>
+      <li>Every order that changed gets a note in its log, e.g. <span class="chip">Quantity changed from 6 to 4 kg, following WH/MO/01234</span>, with who made the change.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Open the manufacturing order, click the quantity next to <b>To Produce</b>, enter the new quantity and confirm.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>Only one level follows. A component order's own component orders keep their quantity; change them the same way on that order if needed.</li>
+      <li>Split batches (Max Batch Size): a decrease comes off the partial batch first, then the newest batch; a batch that reaches zero is cancelled with its pick ticket lines. An increase fills the partial batch up to the batch size first, and anything left over becomes new batch orders, each with its own pick ticket.</li>
+      <li>The change is refused, and <b>nothing</b> changes, when a component order is already <b>done</b>, its pick ticket has been <b>validated</b>, or it also feeds another order. The message names the order or pick ticket in the way.</li>
+      <li>If this order's own pick ticket was already validated, it is left as is: after a decrease the extra components stay in Pre-Production.</li>
+      <li>The sale order's quantity is not changed. Batch production records already printed are not reprinted.</li>
     </ul>
   </div>
 </section>
@@ -459,6 +499,7 @@ mark{background:#ffe27a;padding:0 2px}
       <li>On the product, open the <span class="chip">Batch Production Record</span> tab and enter the package name, size, and unit at the bottom of the tab. <b>One per product.</b></li>
     </ul>
     <div class="note"><b>Heads up</b>The package size feeds the breakdown, so a wrong size shows a wrong (but arithmetically correct) count — e.g. a 25 g package on a bulk ingredient prints hundreds of tiny packages. Keep package sizes accurate.</div>
+    <div class="note"><b>Also used for buying</b>The same package size is what purchase suggestions round up to (§13). Set it to the container you actually buy or receive the ingredient in.</div>
   </div>
 </section>
 
@@ -650,6 +691,7 @@ mark{background:#ffe27a;padding:0 2px}
     <ul>
       <li>While a count for a product/location is awaiting approval, you <b>can't submit another one</b> for that same product/location — wait for it to be approved or rejected first.</li>
       <li>The Inventory Adjustments list flags a line awaiting approval, and both you and the approvers get notified automatically.</li>
+      <li><b>Counting in the Barcode app:</b> if a line on your count disappears from the stock while you are counting (for example the lot was used up or merged), that line simply drops off your count and the rest saves and applies normally.</li>
     </ul>
   </div>
 
@@ -822,11 +864,75 @@ mark{background:#ffe27a;padding:0 2px}
   </div>
 </section>
 
+<!-- ============================ 13 ORDERING IN FULL PACKS ============================ -->
+<section id="full-packs">
+  <div class="sec-head"><span class="no">§13</span><h2>Ordering in Full Packs</h2></div>
+  <p class="sec-lede">Purchase suggestions order whole packs of what you buy, using the package size already set on the product, so you no longer round up by hand.</p>
+
+  <div class="card hot">
+    <h3>Suggestions round up to full packs</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>When Odoo creates a purchase for you — <span class="chip">Order</span> on the Replenishment report, or a purchase made for a manufacturing order — the quantity is rounded <b>up</b> to whole packs of the product's package size. 30 kg needed in 25 kg bags orders 50 kg.</li>
+      <li>The Replenishment report's <b>To Order</b> already shows the rounded quantity for products you buy. Products you make or move between locations are not rounded.</li>
+      <li>Products without a package size order exactly what is needed.</li>
+      <li>The extra goes into stock and is free for later orders.</li>
+    </ul>
+    <div class="lbl">Good to know</div>
+    <ul>
+      <li>More demand added to the same draft RFQ line is rounded on the total, so the extra from the first rounding is used before another pack is added. A quantity you changed by hand on that line is kept.</li>
+      <li>A product with several package sizes rounds up to the smallest.</li>
+      <li>A package size kept in kg on a line bought in lb is matched to the nearest whole lb: a 50 lb bag kept as 22.68 Kg orders <b>100 lb</b> for two bags, not 100.002 lb.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Typing a quantity on an RFQ</h3>
+    <div class="lbl">What it does</div>
+    <ul>
+      <li>A quantity you type is <b>never changed</b>.</li>
+      <li>If it is not a whole number of packs, a <b>Not a full pack</b> warning shows the pack size and the full-pack quantity.</li>
+      <li>The <b>Full Packs</b> column shows the packs that make up each line, largest first — e.g. <span class="chip">1 x Bag 10 kg + 3 x Bag 1 kg (13 Kg)</span>.</li>
+    </ul>
+    <div class="lbl">How to use it</div>
+    <ul>
+      <li>Add the product on the RFQ and type the quantity. Check the warning and the <b>Full Packs</b> column, and change the quantity yourself if you want whole packs. The column can be hidden from the column picker at the end of the line headers.</li>
+    </ul>
+    <div class="note"><b>Heads up</b>The package size comes from the product's <span class="chip">Batch Production Record</span> tab (§04). If a supplier ships a different container than the one set there, the warning will suggest that size anyway; your typed quantity still stands.</div>
+  </div>
+</section>
+
 <section id="changelog">
-  <div class="sec-head"><span class="no">§13</span><h2>Changelog</h2></div>
+  <div class="sec-head"><span class="no">§14</span><h2>Changelog</h2></div>
   <p class="sec-lede">What changed on each production update, newest first.</p>
 
   <div class="log">
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-09</div>
+      <h4>Quantity changes, merges and finished orders keep pick tickets in step</h4>
+      <ul>
+        <li><b>New — quantity changes follow down one level.</b> Changing a manufacturing order's quantity now also resizes the manufacturing orders made directly for it and the pick tickets of every order that changed, keeping their numbers, instead of leaving them at the old size (or adding an extra order on an increase). The change is refused when a component order is already done or picked. See §03.</li>
+        <li><b>New — one pick ticket after a merge.</b> Merging manufacturing orders used to leave each old order's pick ticket open side by side. The merged order now gets one new pick ticket for its full quantity and the old ones are cancelled. The merge is refused with a message when something feeding it is already started or done. See §03.</li>
+        <li><b>Replenishment no longer asks for components that were already used.</b> When a manufacturing order was finished without its pick ticket being validated, the pick ticket stayed open and kept counting as stock going out, so the forecast went negative and Replenishment suggested buying it. Finishing an order now cancels those leftover pick ticket lines; lines still needed by a backorder stay open. The leftover pick tickets from earlier orders were cleaned up. See §03.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-06</div>
+      <h4>Barcode counts no longer get stuck</h4>
+      <ul>
+        <li><b>Barcode app — Inventory count fixed.</b> A count could stop saving and refuse to apply with "Record does not exist or has been deleted" when one of its lines had been cleaned up in the background, until the whole screen was reopened. That line now just drops off the count and everything else saves and applies. See §09.</li>
+      </ul>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-date">2026-11-05</div>
+      <h4>Purchases round up to full packs</h4>
+      <ul>
+        <li><b>New — Ordering in full packs.</b> The Replenishment report and purchases made for a manufacturing order now order whole packs of the product's package size. When you type a quantity yourself it is kept, with a warning and a Full Packs column when it is not whole packs. See §13.</li>
+      </ul>
+    </div>
 
     <div class="log-entry">
       <div class="log-date">2026-11-04</div>
